@@ -9,24 +9,14 @@ def folder_loop(path):
     saves file path"""
     req_paths = []
     for path, dirs, files in os.walk(path):
-       # print(path)
-        #print(dirs)
-        #print(files)
-        if files != []:
-            for i in files:
-                file_path = os.path.join(path,i)
-                print(i)
-                print(file_path)
-                req_paths.append(file_path)
-    print(req_paths)
+        ps = [os.path.join(path, i) for i in files]
+        req_paths.extend(ps)
     return req_paths
 
-    #for file in [f for f in os.listdir(path)]:
-        # Loops through files and folders in path
-        # calls fsttotal function
-        #file_path_a = os.path.join(path, file)
-        #print(file_path_a)
-folder_loop(path)
+
+req_paths = folder_loop(path)
+for i in req_paths:
+    print(i)
 
 def fipath(gvkey, path, ptofile = 0):
     """Function delivers path to files to open"""
