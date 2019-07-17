@@ -29,7 +29,17 @@ terms_old_2 = ["COPYRIGHT 1987 SEC ONLINE, INC.",
                "COPYRIGHT 1994 SEC ONLINE, INC.",
                "COPYRIGHT 1995 SEC ONLINE, INC."]
 
-terms_old = terms_old_1 + terms_old_2
+terms_old_3 = ["COPYRIGHT 1987 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1988 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1989 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1990 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1991 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1992 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1993 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1994 @ SEC ONLINE, INC.",
+               "COPYRIGHT 1995 @ SEC ONLINE, INC."]
+
+terms_old = terms_old_1 + terms_old_2 + terms_old_3
 terms_new_1 = ["SEC Online Database"]
 
 def folder_loop(path):
@@ -44,11 +54,9 @@ def folder_loop(path):
 
 
 req_paths, req_paths_doc = folder_loop(path)
-#print(req_paths)
+
 print(req_paths_doc)
 
-#for i in req_paths_doc:
-    #print(i)
 
 def det_file(file):
     """If called, it determines the file type and number of documents in the file"""
@@ -62,14 +70,10 @@ def det_file(file):
     doc_type_known = False
     doc_type = ''
     fhand = open(file, encoding="utf8")
-    #fhand = open(file)
-    #return None
-    #print(fhand)
-    #print(file)
-    #print(fhand)
     file_info = [file,'','']
     doc_info = [file,'','']
     doc_file_info = []
+    #names_1 = ["Path", "Doc_Type", "Doc_Numb"]
     #try:
     for i in fhand:
         #print("LINE")
@@ -126,47 +130,7 @@ def getText(para, par_top, option = ""):
         fullText.append(newText)
     return fullText
 
-def det_db(file):
-    """Determines if files fro Sec Online Old or New"""
-    #Gather Text From Beginning of Document Until Table of Contents
-    #Old After # of # Docs always has:   [*Summary]             COPYRIGHT 1990 SEC ONLINE, INC.
-    #New: after # of $ Docs always gas: SEC Online Database
-    ttofind_1 = ["[*Summary]             COPYRIGHT 1988 SEC ONLINE, INC.",
-                 "[*Summary]             COPYRIGHT 1989 SEC ONLINE, INC.",
-                 "[*Summary]             COPYRIGHT 1990 SEC ONLINE, INC.",
-                 "[*Summary]             COPYRIGHT 1991 SEC ONLINE, INC.",
-                 "[*Summary]             COPYRIGHT 1992 SEC ONLINE, INC.",
-                 "[*Summary]             COPYRIGHT 1993 SEC ONLINE, INC.",
-                 "[*Summary]             COPYRIGHT 1994 SEC ONLINE, INC.",
-                 "[*Summary]             COPYRIGHT 1995 SEC ONLINE, INC.",
-                 ]
-    ttofind_2 = ["COPYRIGHT 1988 SEC ONLINE, INC.",
-                 "COPYRIGHT 1989 SEC ONLINE, INC.",
-                 "COPYRIGHT 1990 SEC ONLINE, INC.",
-                 "COPYRIGHT 1991 SEC ONLINE, INC.",
-                 "COPYRIGHT 1992 SEC ONLINE, INC.",
-                 "COPYRIGHT 1993 SEC ONLINE, INC.",
-                 "COPYRIGHT 1994 SEC ONLINE, INC.",
-                 "COPYRIGHT 1995 SEC ONLINE, INC.",
-                 ]
 
-    fhand = open(file)
-    #print(fhand)
-    for i in fhand:
-        print("LINE")
-        print(i)
-    fullText = []
-    #aicpa_count = 29 #number of line to check at start of document
-    #if option is "check":
-        #aicpa_count = 10
-    #if option is 'seconline':
-        #aicpa_count = 40
-    #for i in par_top:
-        #newText = []
-        #for j in range(i, i+aicpa_count):
-           #(newText.append(para[j].text.strip()) if para[j].text.strip() != '' else None)
-        #fullText.append(newText)
-    return fullText
 
 
 def main(path):
@@ -193,6 +157,8 @@ def main(path):
     names_PX = [['Icorp', 'Cusip', 'DUNS', 'IRS', 'SIC', 'FYE']]
     all_file_info = []
     docfile_info = [] #line and doc number of each file
+   #all_file_info  = ["Path", "Doc_Type", "Tot_Docs"]
+   #docfile_info  = ["Path", "Doc_Type", "Doc_Numb", "line_start"]
     req_paths = folder_loop(path)[0]
     print(req_paths)
     #path_s = [os.path.splitext(i)[1] for i in req_paths]
@@ -201,15 +167,8 @@ def main(path):
     for i in req_paths:
         print(i)
         a, b = det_file(i)
-        #print(b)
-        #all_file_info.append(det_file(i)[0])
         all_file_info.append(a)
         docfile_info.extend(b)
-
-        #print(i)
-        #print(os.path.splitext(i))
-    #print(all_file_info)
-    #print(docfile_info)
     return all_file_info, docfile_info
     #for i in req_paths:
 
@@ -221,7 +180,6 @@ def write_file(path_file, data, options = 0):
     #if no gvkey, write one per file
     path_to_1 = os.path.join(path_file, 'file_data.txt')
     path_to_2 = os.path.join(path_file, 'doc_file_data.txt')
-    #data_ss = open(os.path.join(path_file, 'sum.text'),'w')
     with open(path_to_1,'w') as file:
         file.writelines('\t'.join(i) + '\n' for i in data[0])
     file.close()
@@ -229,10 +187,10 @@ def write_file(path_file, data, options = 0):
         file.writelines('\t'.join(i) + '\n' for i in data[1])
     file.close()
 
-#a, b = main(path)
+a, b = main(path)
 #print(a)
 #print(b)
-#write_file(path,[a, b])
+write_file(path,[a, b])
 
 
 
