@@ -1,7 +1,7 @@
 ####Master File to Read All SEC Online Files and Organize Data
 
 #Take master files from Directories, read individual files and determine type of file
-import os, time
+import os, time, re
 directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All'
 dir_ss = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\ss_info'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\Specs\10K'
@@ -10,7 +10,8 @@ dir_ss = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\ss_info
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\ALLN'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\single'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\check'
-directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\1992 - New'
+#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\1992 - New'
+#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\1989'
 path = os.path.abspath(directory)
 path_ss = os.path.abspath(dir_ss)
 
@@ -59,98 +60,156 @@ def folder_loop(path):
     return req_paths, req_paths_doc
 
 
-def check_type(a,b):
-    doc_type = ["10-K", "10-Q", "Annual Report to Stockholders", "Proxy Statement", "PROXY", "20-F"]
+def check_type(a,b,c):
+    """Get filing and doc date for SEC_OLD"""
+    doc_type = ["10-K", "10-Q", "Annual Report to Stockholders", "Proxy Statement", "PROXY", "20-F", "10K", "ANNUAL REPORTS"]
     doco_type = ""
+    doco_type_found = False
     error_type = 1
     or_a = a
     a = a.split(";")
     amm = ""
-    if len(a)>1:
+    if len(a) > 1:
         if "Amendment" in a[1].strip():
             amm = a[1].strip()
-    if "10-K" in a:
+    if "10-K" in a or "10K" in b[-1]:
         doco_type = "10K"
-        #print("10-K")
+        doco_type_found = True
     if "10-Q" in a:
         doco_type = "10Q"
-        #print("10-Q")
+        doco_type_found = True
     if "Proxy Statement" or "PROXY" in a:
         doco_type = "Proxy"
-        #print("Proxy")
-    if "Annual Report to Stockholders" in a:
+        doco_type_found = True
+    if "Annual Report to Stockholders" in a or "ANNUAL REPORTS" in b[-1]:
         doco_type = "AR"
-        #print("AR")
+        doco_type_found = True
     if "20-F" in a:
         doco_type = "20F"
-        #print("20F")
-    if not any(i in or_a for i in doc_type):
-        print(a)
-        print("Something happened")
-        print(b)
-        if "FILING-DATE:" in or_a:
-            error_type = 2
-            doco_type = "UK"
+        doco_type_found = True
+    if "FILING-DATE:" in or_a:
+        error_type = 2
+    if not any(i in or_a for i in doc_type) and not doco_type_found:
+        #print(a)
+        #print("Something happened")
+        #print(c, b)
+        #print(b[-1])
+        error_type = 3
+        doco_type = "UK"
+
         time.sleep(10)
     return doco_type, amm, error_type
 
 
 def get_dates(a,b):
-    """Get filing and doc date"""
+    """Get filing and doc date for SEC_OLD"""
+    #Looks for lines with filing and document date
     errors = 0
+    #print(b)
     if 'FILING-DATE:' in a:
         errors = 0
         a = a.split()
     if 'FILING-DATE:' not in a:
-        print(b)
-        print("Some trouble")
-        time.sleep(20)
+        #print(b)
+        #print("Some trouble")
+        #time.sleep(10)
         for i in b:
             if 'FILING-DATE:' in i:
-                print("Found it")
                 a = i
                 a = a.split()
-                print(a)
-                time.sleep(10)
+                #print(a)
+                #time.sleep(10)
                 break
             else:
                 #print("Filing-date not found")
                 file_date, doc_date = None, None
-
-    #print(b)
+    if len(a) > 4:
+        errors = 1
+        print(a)
     if errors == 0:
         if a[0] == "FILING-DATE:":
             file_date = a[1]
         if a[2] == "DOCUMENT-DATE:":
             doc_date = a[3]
-
-    #elif b[6].split()[0] == "FILING-DATE:":
-           #file_date = b[6].split()[0]
-    #elif b[6].split()[0] == "FILING-DATE:":
-            #file_date = b[6].split()[0]
-
-    #file_date, doc_date = None, None
-    #print("No dates found")
-    #print(b)
-
+    if errors == 1:
+        file_date = a[a.index("FILING-DATE:") + 1]
+        doc_date = a[a.index("DOCUMENT-DATE:") + 1]
+        #print(a)
+        #print(file_date,doc_date)
+        time.sleep(10)
     return file_date, doc_date
 
+def get_rest_data(text):
+    """Get rest of the data in the following order:
+    re.sub("��", repl, string, max=0)
+    CONAME, CROSSREFERENCE, TICKER, EXCHANGE, INCORP, CUSIP
+    COMMISION NO, IRS-ID, SIC Codes, """
+    CONAME = ""
+    CROSS_REF = ""
+    TICKER = ""
+    EXCHANGE = ""
+    indices_t = [i for i, elem in enumerate(text) if 'TICKER-SYMBOL:' in elem]
+    indices_e = [i for i, elem in enumerate(text) if 'EXCHANGE:' in elem]
+    indices_c = [i for i, elem in enumerate(text) if 'CROSS-REFERENCE:' in elem]
+    #print(indices_t, indices_e, indices_c )
+    if not indices_t:
+        print("TICKER")
+        print(indices_t)
+        print(text)
+    if not indices_e:
+        print("EXCH")
+        print(indices_e)
+        print(text)
+    #if indices_c != []:
+    if indices_c:
+        #print(not indices_c)
+        CONAME = text[indices_c[0]-1]
+        CROSS_REF = text[indices_c[0]].split(":")[1]
+    #if indices_t[0] > 0 and indices_c == []:
+    if indices_t and not indices_c:
+        CONAME = text[indices_t[0]- 1]
+    #if indices_t[0] > 0:
+    if indices_t:
+        #print("HERE?")
+        temp = text[indices_t[0]].split()
+        TICKER = temp[temp.index("TICKER-SYMBOL:")+1]
+        try:
+            EXCHANGE = temp[temp.index("EXCHANGE:")+1]
+        except:
+            print(text)
+            time.sleep(60)
 
-def col_data(a):
-    #print(a[4])
-    names2 = [['Filing_type', 'Filing_type_a', 'Filing-date', 'Document-Date', 'CONAME','CROSS-REF', 'CUSIP','Ticker', 'IRS-ID',
-               'SIC_P','SIC_A', 'FYE', 'Exchange', 'AUDITOR','STOCK-AGENT','COUNSEL']]
+    #print(CONAME, CROSS_REF, TICKER, EXCHANGE)
+    #if indices_t != indices_e:
+        #print(indices_t, indices_e)
+        #print(text)
+    #if indices_e[0] = ""
+        #print(indices_t, indices_e)
+        #print(text)
+    #print(indices_t,indices_e)
+
+    return None
+
+def col_data(a,b):
+    #a is the text
+    #b is the file name for debugging
+    #print(a)
+    names2 = [['Filing_type', 'Filing_type_a', 'Filing-date', 'Document-Date', 'CONAME','CROSS_REF','Ticker','Exchange',
+               'CUSIP', 'IRS-ID', 'SIC_P','SIC_A', 'FYE', 'AUDITOR','STOCK-AGENT','COUNSEL']]
     data_list = ["","","", "","","","","","","","","","","","",""]
     ttlf = [['FILING-DATE:', 'DOCUMENT-DATE:', 'Document-Date', 'TICKER-SYMBOL:', 'EXCHANGE:',
              "INCORPORATION:", "COMPANY-NUMBER:","CUSIP NUMBER:","COMMISSION FILE NO.:","IRS-ID:",
              "SIC: SIC-CODES:","SIC: PRIMARY SIC:", "PRIMARY SIC:","INDUSTRY-CLASS:", ]]
-    data_list[0], data_list[1], error_type = check_type(a[4],a)
-    if error_type == 1:
-        data_list[2], data_list[3] = get_dates(a[6],a)
-    if error_type == 2:
-        data_list[2], data_list[3] = get_dates(a[4],a)
+    #data_list[0], data_list[1], error_type = check_type(a[4],a, b)
+    #if error_type == 1:
+        #data_list[2], data_list[3] = get_dates(a[6],a)
+    #if error_type == 2:
+        #data_list[2], data_list[3] = get_dates(a[4],a)
+    get_rest_data(a)
     #print(data_list)
     return data_list
+
+
 
 def main(path):
     """Main Function"""
@@ -170,12 +229,11 @@ def main(path):
     #print(req_paths_doc)
     #for filename in os.listdir(req_paths):
     for filename in req_paths:
-        #print("HERE")
-        #print(filename)
         doct_found = 0
         #fhand = open(os.path.abspath(directory + "\\" + filename))
         #fhand = open(os.path.abspath(directory + "\\" + filename), encoding="utf8")
         fhand = open(filename, encoding="utf8")
+        #fhand = open(filename)
         [start, end] = [0, 0]
         text = []
         doc_count = 0
@@ -186,9 +244,7 @@ def main(path):
         doc_info = [filename, '', '']
         doc_file_info = []
         for line in fhand:
-            if doc_count == 1 and not doc_type_known:
-                print("Check DOC Type")
-                print(filename)
+            if not doc_type_known:
                 if terms_new_1[0].lower() in line.lower():
                     doc_type_known = True
                     file_info[1] = "SEC_NEW"
@@ -197,12 +253,11 @@ def main(path):
                     file_info[1] = "SEC_OLD"
                     doc_type = "SEC_OLD"
                     doc_type_known = True
-                print(doc_type)
-
             if all(f in line for f in start_docu) and len(set(line.split()) - set(start_docu)) is 2 \
                      and all(s.isdigit for s in list(set(line.split())-set(start_docu))):
                 [start, end] = [1, 0]
                 text = []
+                doc_type_known = False
                 doc_count += 1
                 doc_info[1] = doc_count
                 doc_info[2] = line_count
@@ -214,7 +269,8 @@ def main(path):
             if doc_type == "SEC_OLD" and "TABLE OF CONTENTS" in line:
                 if start == 1:
                     #print(text)
-                    col_data(text)
+                    text.append(line.strip().replace('\xa0', ' '))
+                    col_data(text, filename)
                 [start, end] = [0, 1]
             if start == 1 and end == 0:
                 #print(line)
