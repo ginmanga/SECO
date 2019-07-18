@@ -10,6 +10,7 @@ dir_ss = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\ss_info
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\ALLN'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\single'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\check'
+directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\1992 - New'
 path = os.path.abspath(directory)
 path_ss = os.path.abspath(dir_ss)
 
@@ -70,19 +71,19 @@ def check_type(a,b):
             amm = a[1].strip()
     if "10-K" in a:
         doco_type = "10K"
-        print("10-K")
+        #print("10-K")
     if "10-Q" in a:
         doco_type = "10Q"
-        print("10-Q")
+        #print("10-Q")
     if "Proxy Statement" or "PROXY" in a:
         doco_type = "Proxy"
-        print("Proxy")
+        #print("Proxy")
     if "Annual Report to Stockholders" in a:
         doco_type = "AR"
-        print("AR")
+        #print("AR")
     if "20-F" in a:
         doco_type = "20F"
-        print("20F")
+        #print("20F")
     if not any(i in or_a for i in doc_type):
         print(a)
         print("Something happened")
@@ -90,7 +91,7 @@ def check_type(a,b):
         if "FILING-DATE:" in or_a:
             error_type = 2
             doco_type = "UK"
-        #time.sleep(20)
+        time.sleep(10)
     return doco_type, amm, error_type
 
 
@@ -136,7 +137,7 @@ def get_dates(a,b):
 
 
 def col_data(a):
-    print(a[4])
+    #print(a[4])
     names2 = [['Filing_type', 'Filing_type_a', 'Filing-date', 'Document-Date', 'CONAME','CROSS-REF', 'CUSIP','Ticker', 'IRS-ID',
                'SIC_P','SIC_A', 'FYE', 'Exchange', 'AUDITOR','STOCK-AGENT','COUNSEL']]
     data_list = ["","","", "","","","","","","","","","","","",""]
@@ -148,7 +149,7 @@ def col_data(a):
         data_list[2], data_list[3] = get_dates(a[6],a)
     if error_type == 2:
         data_list[2], data_list[3] = get_dates(a[4],a)
-    print(data_list)
+    #print(data_list)
     return data_list
 
 def main(path):
@@ -157,13 +158,6 @@ def main(path):
     # Pass text to different parsing functions to collect data
     path = os.path.abspath(path)
     print(path)
-    #names = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count',
-              #'start_paragraph', 'Company Name','SIC', 'DATE', 'TICKER']]
-    #names2 = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count', 'start_paragraph',
-               #'Document Type', 'Company Name', 'Filing Date','Document Date',
-               #'TICKER', 'Exchange','Incorporation', 'CUSIP', 'SIC']]
-    #names3 = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count']]
-    #names4 = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count']]
     names = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count', 'start_line', 'D_base']]
     names2 = [['Filing_type', 'Filing-date', 'Document-Date', 'CONAME', 'CUSIP','Ticker', 'IRS-ID',
                'SIC_P','SIC_A', 'FYE', 'Exchange', 'AUDITOR','STOCK-AGENT','COUNSEL']]
@@ -176,7 +170,7 @@ def main(path):
     #print(req_paths_doc)
     #for filename in os.listdir(req_paths):
     for filename in req_paths:
-        print("HERE")
+        #print("HERE")
         #print(filename)
         doct_found = 0
         #fhand = open(os.path.abspath(directory + "\\" + filename))
@@ -193,6 +187,8 @@ def main(path):
         doc_file_info = []
         for line in fhand:
             if doc_count == 1 and not doc_type_known:
+                print("Check DOC Type")
+                print(filename)
                 if terms_new_1[0].lower() in line.lower():
                     doc_type_known = True
                     file_info[1] = "SEC_NEW"
@@ -201,6 +197,7 @@ def main(path):
                     file_info[1] = "SEC_OLD"
                     doc_type = "SEC_OLD"
                     doc_type_known = True
+                print(doc_type)
 
             if all(f in line for f in start_docu) and len(set(line.split()) - set(start_docu)) is 2 \
                      and all(s.isdigit for s in list(set(line.split())-set(start_docu))):
@@ -210,7 +207,10 @@ def main(path):
                 doc_info[1] = doc_count
                 doc_info[2] = line_count
                 doc_file_info.append([filename, doc_type, str(doc_count), str(line_count)])
-
+            if doc_type == "SEC_NEW":
+                None
+                #print(doc_type)
+                #time.sleep(5)
             if doc_type == "SEC_OLD" and "TABLE OF CONTENTS" in line:
                 if start == 1:
                     #print(text)
