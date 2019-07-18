@@ -1,6 +1,6 @@
 import os
 
-directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All'
+#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\Specs\10K'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\ALLN'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\single'
