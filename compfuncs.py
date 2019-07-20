@@ -45,22 +45,20 @@ def get_iconumbers(text):
     IND_CLASS = ""
     FYE = ""
     AUDITOR = ""
+    P_SIC = ""
+    A_SIC = ""
     text = [re.sub("��", "", i) for i in text]
     indices = []
     terms = ['INCORPORATION:','CUSIP NUMBER:','COMMISSION FILE NO.:','IRS-ID:', 'INDUSTRY-CLASS:','FYE:',
              'AUDITOR:' ]
-    indices_incorp = [i for i, elem in enumerate(text) if 'INCORPORATION:' in elem]
-    indices_CUSIP = [i for i, elem in enumerate(text) if 'CUSIP NUMBER:' in elem]
-    indices_COMNO = [i for i, elem in enumerate(text) if 'COMMISSION FILE NO.:' in elem]
-    indices_IRS = [i for i, elem in enumerate(text) if 'IRS-ID:' in elem]
-    indices_IND_CLASS = [i for i, elem in enumerate(text) if 'INDUSTRY-CLASS:' in elem]
-    indices_FYE = [i for i, elem in enumerate(text) if 'FYE:' in elem]
-    indices_AUDITOR = [i for i, elem in enumerate(text) if 'AUDITOR:' in elem]
+    #indices_incorp = [i for i, elem in enumerate(text) if 'INCORPORATION:' in elem]
+    #indices_CUSIP = [i for i, elem in enumerate(text) if 'CUSIP NUMBER:' in elem]
+    #indices_COMNO = [i for i, elem in enumerate(text) if 'COMMISSION FILE NO.:' in elem]
+    #indices_IRS = [i for i, elem in enumerate(text) if 'IRS-ID:' in elem]
+    #indices_IND_CLASS = [i for i, elem in enumerate(text) if 'INDUSTRY-CLASS:' in elem]
+    #indices_FYE = [i for i, elem in enumerate(text) if 'FYE:' in elem]
+    #indices_AUDITOR = [i for i, elem in enumerate(text) if 'AUDITOR:' in elem]
 
-    #if indices_incorp:
-        #temp = text[indices_incorp[0]].split(":")
-        #INCORP = temp[1]
-        #print(INCORP)
     try:
         INCORP = [i.split(":")[1].strip() for i in text if 'INCORPORATION:' in i][0]
     except:
@@ -90,9 +88,16 @@ def get_iconumbers(text):
         AUDITOR = temp[[i.strip() for i in temp].index('AUDITOR')+1]
     except:
         None
-    print(IRS, FYE, AUDITOR)
-    #if any(i in IRS for i in ["NONE","N/A"]):
-        #print(CUSIP, COMMNO)
-        #print(text)
-    #print(INCORP[0])
-    #print(t)
+    try:
+        temp = [i for i in text if 'SIC:' in i][0].split(":")
+        temp1 = [i for i in text if 'PRIMARY SIC:' in i][0].split(":")
+        if temp == temp1:
+            A_SIC = P_SIC = temp[[i.strip() for i in temp].index('PRIMARY SIC') + 1]
+        if temp != temp1:
+            P_SIC = temp1[[i.strip() for i in temp1].index('PRIMARY SIC') + 1]
+            A_SIC = temp[[i.strip() for i in temp].index('SIC-CODES') + 1:]
+        #print(A_SIC, P_SIC)
+    except:
+        None
+
+    return [INCORP, CUSIP, COMMNO, IRS, P_SIC, IND_CLASS, FYE, AUDITOR]

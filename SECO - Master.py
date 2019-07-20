@@ -1,28 +1,31 @@
 ####Master File to Read All SEC Online Files and Organize Data
 
 #Take master files from Directories, read individual files and determine type of file
-import os, time, re
+import os, time, compfuncs
 directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All'
 dir_ss = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\ss_info'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\Specs\10K'
-#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\small'
+directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\small'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\Specs\AR'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\ALLN'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\single'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\check'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\1992 - New'
-#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\1989'
+#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\1994'
 path = os.path.abspath(directory)
 path_ss = os.path.abspath(dir_ss)
 
-terms_old_1 = ["[*Summary]             COPYRIGHT 1988 SEC ONLINE, INC.",
-               "[*Summary]             COPYRIGHT 1989 SEC ONLINE, INC.",
-               "[*Summary]             COPYRIGHT 1990 SEC ONLINE, INC.",
-               "[*Summary]             COPYRIGHT 1991 SEC ONLINE, INC.",
-               "[*Summary]             COPYRIGHT 1992 SEC ONLINE, INC.",
-               "[*Summary]             COPYRIGHT 1993 SEC ONLINE, INC.",
-               "[*Summary]             COPYRIGHT 1994 SEC ONLINE, INC.",
-               "[*Summary]             COPYRIGHT 1995 SEC ONLINE, INC.",
+terms_old_1 = ["[*Summary]             COPYRIGHT 1987 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1988 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1989 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1990 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1991 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1992 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1993 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1994 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1995 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1996 SEC ONLINE, INC.",
+               "[*Summary]             COPYRIGHT 1990 SEC ONLINE, INC."
              ]
 terms_old_2 = ["COPYRIGHT 1987 SEC ONLINE, INC.",
                "COPYRIGHT 1988 SEC ONLINE, INC.",
@@ -44,7 +47,10 @@ terms_old_3 = ["COPYRIGHT 1987 @ SEC ONLINE, INC.",
                "COPYRIGHT 1994 @ SEC ONLINE, INC.",
                "COPYRIGHT 1995 @ SEC ONLINE, INC."]
 terms_old = terms_old_1 + terms_old_2 + terms_old_3
+print(terms_old)
 terms_new_1 = ["SEC Online Database"]
+terms_not_in = "Source: SEC Online Database*"
+print(terms_not_in)
 start_docu = ["of", "DOCUMENTS"]
 
 
@@ -98,7 +104,8 @@ def check_type(a,b,c):
         doco_type = "UK"
 
         time.sleep(10)
-    return doco_type, amm, error_type
+    #return doco_type, amm, error_type
+    return [doco_type, amm], error_type
 
 
 def get_dates(a,b):
@@ -137,62 +144,20 @@ def get_dates(a,b):
         #print(a)
         #print(file_date,doc_date)
         time.sleep(10)
-    return file_date, doc_date
+    return [file_date, doc_date]
 
 def get_rest_data(text):
     """Get rest of the data in the following order:
-    re.sub("��", repl, string, max=0)
     CONAME, CROSSREFERENCE, TICKER, EXCHANGE, INCORP, CUSIP
     COMMISION NO, IRS-ID, SIC Codes, """
-    CONAME = ""
-    CROSS_REF = ""
-    TICKER = ""
-    EXCHANGE = ""
-    indices_t = [i for i, elem in enumerate(text) if 'TICKER-SYMBOL:' in elem]
-    indices_e = [i for i, elem in enumerate(text) if 'EXCHANGE:' in elem]
-    indices_c = [i for i, elem in enumerate(text) if 'CROSS-REFERENCE:' in elem]
-    #print(indices_t, indices_e, indices_c )
-    if not indices_t:
-        print("TICKER")
-        print(indices_t)
-        print(text)
-    if not indices_e:
-        print("EXCH")
-        print(indices_e)
-        print(text)
-    #if indices_c != []:
-    if indices_c:
-        #print(not indices_c)
-        CONAME = text[indices_c[0]-1]
-        CROSS_REF = text[indices_c[0]].split(":")[1]
-    #if indices_t[0] > 0 and indices_c == []:
-    if indices_t and not indices_c:
-        CONAME = text[indices_t[0]- 1]
-    #if indices_t[0] > 0:
-    if indices_t:
-        #print("HERE?")
-        temp = text[indices_t[0]].split()
-        TICKER = temp[temp.index("TICKER-SYMBOL:")+1]
-        try:
-            EXCHANGE = temp[temp.index("EXCHANGE:")+1]
-        except:
-            print(text)
-            time.sleep(60)
-
-    #print(CONAME, CROSS_REF, TICKER, EXCHANGE)
-    #if indices_t != indices_e:
-        #print(indices_t, indices_e)
-        #print(text)
-    #if indices_e[0] = ""
-        #print(indices_t, indices_e)
-        #print(text)
-    #print(indices_t,indices_e)
-
+    data_prem = compfuncs.get_nte(text)
     return None
 
-def col_data(a,b):
+def col_data(text,b,c):
     #a is the text
     #b is the file name for debugging
+    #c is doc info
+    d = list(c) # creates copy to extend
     #print(a)
     names2 = [['Filing_type', 'Filing_type_a', 'Filing-date', 'Document-Date', 'CONAME','CROSS_REF','Ticker','Exchange',
                'CUSIP', 'IRS-ID', 'SIC_P','SIC_A', 'FYE', 'AUDITOR','STOCK-AGENT','COUNSEL']]
@@ -200,14 +165,28 @@ def col_data(a,b):
     ttlf = [['FILING-DATE:', 'DOCUMENT-DATE:', 'Document-Date', 'TICKER-SYMBOL:', 'EXCHANGE:',
              "INCORPORATION:", "COMPANY-NUMBER:","CUSIP NUMBER:","COMMISSION FILE NO.:","IRS-ID:",
              "SIC: SIC-CODES:","SIC: PRIMARY SIC:", "PRIMARY SIC:","INDUSTRY-CLASS:", ]]
-    #data_list[0], data_list[1], error_type = check_type(a[4],a, b)
-    #if error_type == 1:
-        #data_list[2], data_list[3] = get_dates(a[6],a)
-    #if error_type == 2:
-        #data_list[2], data_list[3] = get_dates(a[4],a)
-    get_rest_data(a)
-    #print(data_list)
-    return data_list
+    #data_list[0], data_list[1], error_type = check_type(text[4],text, b)
+    data_list_1, error_type = check_type(text[4], text, b)
+    #print(data_list_1)
+    if error_type == 1:
+        data_list_2 = get_dates(text[6],text) #doc and fiel date
+    if error_type == 2:
+        data_list_2 = get_dates(text[4],text) #doc and fiel date
+    #print(data_list_2)
+    data_list_3 = [CONAME, CROSS_REF, TICKER, EXCHANGE] = compfuncs.get_nte(text)
+    #print(data_list_3)
+    data_list_4 = [INCORP, CUSIP, COMMNO, IRS, P_SIC, IND_CLASS, FYE, AUDITOR] = compfuncs.get_iconumbers(text)
+    #print(text)
+    #print(data_list_3)
+    #print(data_list_4)
+    #all_data_old = data_list_1.extend(data_list_2)
+    data_list_1.extend(data_list_2)
+    data_list_1.extend(data_list_3)
+    data_list_1.extend(data_list_4)
+    d.extend(data_list_1)
+    #print(c)
+    #print(d)
+    return d
 
 
 
@@ -218,12 +197,16 @@ def main(path):
     path = os.path.abspath(path)
     print(path)
     names = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count', 'start_line', 'D_base']]
-    names2 = [['Filing_type', 'Filing-date', 'Document-Date', 'CONAME', 'CUSIP','Ticker', 'IRS-ID',
+    names_old = [['Filing_type', 'Filing-date', 'Document-Date', 'CONAME', 'CUSIP','Ticker', 'IRS-ID',
                'SIC_P','SIC_A', 'FYE', 'Exchange', 'AUDITOR','STOCK-AGENT','COUNSEL']]
     data_list = ["","","","","","","","","","","","","",""]
     ttlf = [['FILING-DATE:', 'DOCUMENT-DATE:', 'Document-Date', 'TICKER-SYMBOL:', 'EXCHANGE:',
              "INCORPORATION:", "COMPANY-NUMBER:","CUSIP NUMBER:","COMMISSION FILE NO.:","IRS-ID:",
              "SIC: SIC-CODES:","SIC: PRIMARY SIC:", "PRIMARY SIC:","INDUSTRY-CLASS:", ]]
+
+    names_old = [['Filing_type', 'Filing_type_a', 'Filing-date', 'Document-Date',
+               'CONAME','CROSS_REF','Ticker','Exchange', 'CUSIP', 'IRS-ID',
+               'SIC_P', 'FYE', 'AUDITOR']]
     doct_found = 0
     req_paths, req_paths_doc = folder_loop(path) #creates lists of paths
     #print(req_paths_doc)
@@ -241,11 +224,12 @@ def main(path):
         doc_type_known = False
         doc_type = ''
         file_info = [filename, '', '']
-        doc_info = [filename, '', '']
-        doc_file_info = []
+        doc_info = [filename,'','','']
+        doc_data = []
         for line in fhand:
+            line_count +=1
             if not doc_type_known:
-                if terms_new_1[0].lower() in line.lower():
+                if terms_new_1[0].lower() in line.lower() and line.strip() != "Source: SEC Online Database*":
                     doc_type_known = True
                     file_info[1] = "SEC_NEW"
                     doc_type = "SEC_NEW"
@@ -259,23 +243,26 @@ def main(path):
                 text = []
                 doc_type_known = False
                 doc_count += 1
-                doc_info[1] = doc_count
-                doc_info[2] = line_count
-                doc_file_info.append([filename, doc_type, str(doc_count), str(line_count)])
+                doc_info[2] = doc_count
+                doc_info[3] = line_count
+                #print(doc_info)
+                #doc_file_info.append([filename, doc_type, str(doc_count), str(line_count)])
+                #print(doc_file_info)
             if doc_type == "SEC_NEW":
                 None
-                #print(doc_type)
-                #time.sleep(5)
             if doc_type == "SEC_OLD" and "TABLE OF CONTENTS" in line:
                 if start == 1:
-                    #print(text)
                     text.append(line.strip().replace('\xa0', ' '))
-                    col_data(text, filename)
+                    doc_info[1] = doc_type
+                    #print(doc_info)
+                    #print(text)
+                    doc_data.append(col_data(text, filename, doc_info))
+                    #doc_info.extend(col_data(text, filename, doc_info))
                 [start, end] = [0, 1]
+                doc_type_known = False
             if start == 1 and end == 0:
-                #print(line)
                 text.append(line.strip().replace('\xa0',' '))
-            #print(text)
-    return None
+        print(doc_data)
+    return doc_data
 print(path)
 main(path)
