@@ -1,4 +1,31 @@
 import re
+
+
+def convert_filing_type(a):
+    #print(a)
+    doco_type = ""
+    if a == "10-K":
+        doco_type = "10K"
+    if a == "10-Q":
+        doco_type = "10Q"
+    if a == "Annual Reports to Shareholders":
+        doco_type = "AR"
+    if a == "Proxy Statement":
+        doco_type = "Proxy"
+    return doco_type
+
+
+def get_new_all(text):
+    Filing_type = ""
+    CONAME = ""
+    terms = ['EXHIBIT TYPE:','FILING DATE:','REPORT PERIOD:','CONAME','TICKER: TICKER-SYMBOL:','EXCHANGE:', 'SIC CODES:']
+    #if "SEC Online Database" in text:
+    #indices_t = [i for i, elem in enumerate(text) if "SEC Online Database" in elem]
+    CONAME = text[[i for i, elem in enumerate(text) if "SEC Online Database" in elem][0]+2]
+    Filing_type = convert_filing_type([i.split(":")[1].strip() for i in text if 'EXHIBIT TYPE:' in i][0])
+    print(Filing_type)
+    print(text)
+
 def get_nte(text):
     """Get name exchange ticker"""
     all_data = []
@@ -96,8 +123,6 @@ def get_iconumbers(text):
         if temp != temp1:
             P_SIC = temp1[[i.strip() for i in temp1].index('PRIMARY SIC') + 1]
             A_SIC = temp[[i.strip() for i in temp].index('SIC-CODES') + 1:]
-        #print(A_SIC, P_SIC)
     except:
         None
-
     return [INCORP, CUSIP, COMMNO, IRS, P_SIC, IND_CLASS, FYE, AUDITOR]
