@@ -16,16 +16,51 @@ def convert_filing_type(a):
 
 
 def get_new_all(text):
-    Filing_type = ""
+    filing_type = ""
+    filing_type_a = ""
     CONAME = ""
+    CROSS_REF = ""
+    filing_date = ''
+    document_date = ''
+    ticker = ''
+    exchange = ''
+    CUSIP = ""
+    SIC_CODES = ""
+    IRS_ID = ""
+    FYE = ""
+    AUDITOR = ""
     terms = ['EXHIBIT TYPE:','FILING DATE:','REPORT PERIOD:','CONAME','TICKER: TICKER-SYMBOL:','EXCHANGE:', 'SIC CODES:']
     #if "SEC Online Database" in text:
-    #indices_t = [i for i, elem in enumerate(text) if "SEC Online Database" in elem]
+    indices_t = [i for i, elem in enumerate(text) if "SIC CODES:" in elem]
+    names_old = [['filing_type', 'filing_type_a', 'filing_date', 'document_date',
+               'CONAME','CROSS_REF','ticker','exchange', 'CUSIP', 'IRS_ID',
+               'SIC_P', 'FYE', 'AUDITOR']]
     CONAME = text[[i for i, elem in enumerate(text) if "SEC Online Database" in elem][0]+2]
-    Filing_type = convert_filing_type([i.split(":")[1].strip() for i in text if 'EXHIBIT TYPE:' in i][0])
-    print(Filing_type)
-    print(text)
-
+    try:
+        filing_type = convert_filing_type([i.split(":")[1].strip() for i in text if 'EXHIBIT TYPE:' in i][0])
+    except:
+        print(text)
+    try:
+        filing_date = [i.split(":")[1].strip() for i in text if 'FILING DATE:' in i][0]
+    except:
+        print(text)
+    document_date = [i.split(":")[1].strip() for i in text if 'REPORT PERIOD:' in i][0]
+    ticker = [i.split("TICKER-SYMBOL:")[1].strip() for i in text if 'TICKER: TICKER-SYMBOL:' in i][0]
+    exchange = [i.split(":")[1].strip() for i in text if 'EXCHANGE:' in i][0]
+    try:
+        SIC_CODES = text[[i for i, elem in enumerate(text) if "SIC CODES:" in elem][0]+1].split(',')[0]
+    except:
+        None
+    if filing_type
+    #print(text)
+    #print(filing_type)
+    #print(filing_date)
+    #print(document_date)
+    #print(ticker)
+    #print(exchange)
+    #print(SIC_CODES)
+    return [filing_type,filing_type_a, filing_date, document_date, CONAME, CROSS_REF,
+            ticker, exchange, CUSIP, IRS_ID, SIC_CODES, FYE, AUDITOR]
 def get_nte(text):
     """Get name exchange ticker"""
     all_data = []

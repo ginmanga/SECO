@@ -5,8 +5,9 @@ import os, time, compfuncs
 directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All'
 dir_ss = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\All\ss_info'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\Specs\10K'
-directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\small'
-directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\smaller'
+#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\small'
+#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\smaller'
+#directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\small2'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\Specs\AR'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\ALLN'
 #directory = r'C:\Users\Panqiao\Documents\Research\SEC Online - 05042017\single'
@@ -56,10 +57,10 @@ terms_old_3 = ["COPYRIGHT 1987 @ SEC ONLINE, INC.",
                "COPYRIGHT 1994 @ SEC ONLINE, INC.",
                "COPYRIGHT 1995 @ SEC ONLINE, INC."]
 terms_old = terms_old_1 + terms_old_2 + terms_old_3
-print(terms_old)
+#print(terms_old)
 terms_new_1 = ["SEC Online Database"]
 terms_not_in = "Source: SEC Online Database*"
-print(terms_not_in)
+#print(terms_not_in)
 start_docu = ["of", "DOCUMENTS"]
 
 
@@ -111,8 +112,7 @@ def check_type(a,b,c):
         #print(b[-1])
         error_type = 3
         doco_type = "UK"
-
-        time.sleep(10)
+        #time.sleep(10)
     return [doco_type, amm], error_type
 
 
@@ -137,7 +137,7 @@ def get_dates(a,b):
                 file_date, doc_date = None, None
     if len(a) > 4:
         errors = 1
-        print(a)
+        #print(a)
     if errors == 0:
         if a[0] == "FILING-DATE:":
             file_date = a[1]
@@ -146,7 +146,7 @@ def get_dates(a,b):
     if errors == 1:
         file_date = a[a.index("FILING-DATE:") + 1]
         doc_date = a[a.index("DOCUMENT-DATE:") + 1]
-        time.sleep(10)
+        #time.sleep(10)
     return [file_date, doc_date]
 
 def get_rest_data(text):
@@ -163,21 +163,13 @@ def col_data(text,b,c):
     #c is doc info
     #print(text)
     d = list(c) # creates copy to extend
-    names2 = [['Filing_type', 'Filing_type_a', 'Filing-date', 'Document-Date', 'CONAME','CROSS_REF','Ticker','Exchange',
-               'CUSIP', 'IRS-ID', 'SIC_P','SIC_A', 'FYE', 'AUDITOR','STOCK-AGENT','COUNSEL']]
-    data_list = ["","","", "","","","","","","","","","","","",""]
-    ttlf = [['FILING-DATE:', 'DOCUMENT-DATE:', 'Document-Date', 'TICKER-SYMBOL:', 'EXCHANGE:',
-             "INCORPORATION:", "COMPANY-NUMBER:","CUSIP NUMBER:","COMMISSION FILE NO.:","IRS-ID:",
-             "SIC: SIC-CODES:","SIC: PRIMARY SIC:", "PRIMARY SIC:","INDUSTRY-CLASS:", ]]
     data_list_1, error_type = check_type(text[4], text, b)
     #print(data_list_1)
     if error_type == 1:
         data_list_2 = get_dates(text[6],text) #doc and fiel date
     if error_type == 2:
         data_list_2 = get_dates(text[4],text) #doc and fiel date
-    #print(data_list_2)
     data_list_3 = [CONAME, CROSS_REF, TICKER, EXCHANGE] = compfuncs.get_nte(text)
-    #print(data_list_3)
     data_list_4 = [INCORP, CUSIP, COMMNO, IRS, P_SIC, IND_CLASS, FYE, AUDITOR] = compfuncs.get_iconumbers(text)
     data_list_1.extend(data_list_2)
     data_list_1.extend(data_list_3)
@@ -190,7 +182,8 @@ def col_data_new(text,b,c):
     #b is the file name for debugging
     #c is doc info
     d = list(c) # creates copy to extend
-    compfuncs.get_new_all(text)
+    d.extend(compfuncs.get_new_all(text))
+    #print(d)
     return d
 
 
@@ -201,15 +194,15 @@ def main(path):
     path = os.path.abspath(path)
     print(path)
     names = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count', 'start_line', 'D_base']]
-    names_old = [['Filing_type', 'Filing-date', 'Document-Date', 'CONAME', 'CUSIP','Ticker', 'IRS-ID',
-               'SIC_P','SIC_A', 'FYE', 'Exchange', 'AUDITOR','STOCK-AGENT','COUNSEL']]
+    names_old = [['filing_type', 'filing_date', 'document_date', 'CONAME', 'CUSIP','Ticker', 'IRS_ID',
+               'SIC_P','SIC_A', 'FYE', 'exchange', 'AUDITOR','STOCK-AGENT','COUNSEL']]
     data_list = ["","","","","","","","","","","","","",""]
     ttlf = [['FILING-DATE:', 'DOCUMENT-DATE:', 'Document-Date', 'TICKER-SYMBOL:', 'EXCHANGE:',
              "INCORPORATION:", "COMPANY-NUMBER:","CUSIP NUMBER:","COMMISSION FILE NO.:","IRS-ID:",
              "SIC: SIC-CODES:","SIC: PRIMARY SIC:", "PRIMARY SIC:","INDUSTRY-CLASS:", ]]
 
-    names_old = [['Filing_type', 'Filing_type_a', 'Filing-date', 'Document-Date',
-               'CONAME','CROSS_REF','Ticker','Exchange', 'CUSIP', 'IRS-ID',
+    names_old = [['filing_type', 'filing_type_a', 'filing_date', 'document_date',
+               'CONAME','CROSS_REF','ticker','exchange', 'CUSIP', 'IRS_ID',
                'SIC_P', 'FYE', 'AUDITOR']]
     doct_found = 0
     req_paths, req_paths_doc = folder_loop(path) #creates lists of paths
@@ -231,6 +224,7 @@ def main(path):
         doc_info = [filename,'','','']
         doc_data = []
         start_docu = ["of", "DOCUMENTS"]
+        print(filename)
 
         for line in fhand:
             if not doc_type_known:
@@ -242,66 +236,51 @@ def main(path):
                     file_info[1] = "SEC_OLD"
                     doc_type = "SEC_OLD"
                     doc_type_known = True
-            #print(line)
-            #if all(f in line for f in start_docu):
-                #print(line)
-                #print(len(set(line.split()) - set(start_docu)))
+
             if all(f in line for f in start_docu):
                 check = [word for word in line.strip().split() if word not in start_docu]
                 if len(check) == 2 and all(s.isdigit for s in check):
-                    #print("WEE HEEEEEEEEEEEERTEEEEEEEEEEEEEEEEE")
-                    #print(line)
                     [start, end] = [1, 0]
                     text = []
                     doc_type_known = False
                     doc_count += 1
                     doc_info[2] = doc_count
                     doc_info[3] = line_count
-                    # print(doc_info)
-                    #doc_file_info.append([filename, doc_type, str(doc_count), str(line_count)])
-                    # print(doc_file_info)
 
 
-            #if all(f in line for f in start_docu) and len(set(line.split()) - set(start_docu)) is 2 \
+            #if all(f in line for f in start_docu) and len(set(line.split()) - set(start_docu)) in [1,2] \
                      #and all(s.isdigit for s in list(set(line.split())-set(start_docu))):
-                #print("WEE HEEEEEEEEEEEERTEEEEEEEEEEEEEEEEE")
-                #print(line)
-                #print(time.sleep(5))
                 #[start, end] = [1, 0]
                 #text = []
                 #doc_type_known = False
                 #doc_count += 1
                 #doc_info[2] = doc_count
                 #doc_info[3] = line_count
-                #print(doc_info)
-                #doc_file_info.append([filename, doc_type, str(doc_count), str(line_count)])
-                #print(doc_file_info)
+
 
             if doc_type == "SEC_OLD" and "TABLE OF CONTENTS" in line:
-                if start == 1:
-                    text.append(line.strip().replace('\xa0', ' '))
-                    doc_info[1] = doc_type
-                    #print(doc_info)
-                    #print(text)
-                    #print(text)
-                    doc_data.append(col_data(text, filename, doc_info))
-                    #doc_info.extend(col_data(text, filename, doc_info))
-                [start, end] = [0, 1]
-                doc_type_known = False
+                None
+                #if start == 1:
+                    #text.append(line.strip().replace('\xa0', ' '))
+                    #doc_info[1] = doc_type
+                    #doc_data.append(col_data(text, filename, doc_info))
+                #[start, end] = [0, 1]
+                #doc_type_known = False
             if doc_type == "SEC_NEW" and "* * * * * * * * * * CONTENTS * * * * * * * * * *" in line:
                 if start == 1:
                     text.append(line.strip().replace('\xa0', ' '))
                     doc_info[1] = doc_type
-                    #print(doc_info)
-                    #print(text)
-                    col_data_new(text, filename, doc_info)
+                    doc_data.append(col_data_new(text, filename, doc_info))
                     #doc_info.extend(col_data(text, filename, doc_info))
                 [start, end] = [0, 1]
                 doc_type_known = False
             if start == 1 and end == 0:
                 text.append(line.strip().replace('\xa0',' '))
             line_count += 1
-        #print(doc_data)
+        for i in doc_data:
+            print(i)
     return doc_data
 print(path)
 main(path)
+#for i in main(path):
+    #print(i)
