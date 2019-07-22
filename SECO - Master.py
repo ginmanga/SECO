@@ -64,7 +64,6 @@ terms_not_in = "Source: SEC Online Database*"
 start_docu = ["of", "DOCUMENTS"]
 
 
-
 def folder_loop(path):
     """Loops through contents of a folder
     saves file path, keep only text files"""
@@ -82,8 +81,10 @@ def check_type(a,b,c):
     doco_type = ""
     doco_type_found = False
     error_type = 1
+    #print(a)
     or_a = a
     a = a.split(";")
+    #print(a)
     amm = ""
     if len(a) > 1:
         if "Amendment" in a[1].strip():
@@ -91,10 +92,10 @@ def check_type(a,b,c):
     if "10-K" in a or "10K" in b[-1]:
         doco_type = "10K"
         doco_type_found = True
-    if "10-Q" in a:
+    if "10-Q" in a or "10Q" in b[-1]:
         doco_type = "10Q"
         doco_type_found = True
-    if "Proxy Statement" or "PROXY" in a:
+    if or_a in ["Proxy Statement", "PROXY"] or "PROXY" in b[-1]:
         doco_type = "Proxy"
         doco_type_found = True
     if "Annual Report to Stockholders" in a or "ANNUAL REPORTS" in b[-1]:
@@ -102,6 +103,9 @@ def check_type(a,b,c):
         doco_type_found = True
     if "20-F" in a:
         doco_type = "20F"
+        doco_type_found = True
+    if "10-F" in a:
+        doco_type = "10F"
         doco_type_found = True
     if "FILING-DATE:" in or_a:
         error_type = 2
@@ -112,6 +116,9 @@ def check_type(a,b,c):
         #print(b[-1])
         error_type = 3
         doco_type = "UK"
+        print(a)
+        print(or_a)
+        print(b)
         #time.sleep(10)
     return [doco_type, amm], error_type
 
@@ -120,7 +127,6 @@ def get_dates(a,b):
     """Get filing and doc date for SEC_OLD"""
     #Looks for lines with filing and document date
     errors = 0
-    #print(b)
     if 'FILING-DATE:' in a:
         errors = 0
         a = a.split()
@@ -146,7 +152,6 @@ def get_dates(a,b):
     if errors == 1:
         file_date = a[a.index("FILING-DATE:") + 1]
         doc_date = a[a.index("DOCUMENT-DATE:") + 1]
-        #time.sleep(10)
     return [file_date, doc_date]
 
 def get_rest_data(text):
@@ -161,16 +166,17 @@ def col_data(text,b,c):
     #a is the text
     #b is the file name for debugging
     #c is doc info
-    #print(text)
+
     d = list(c) # creates copy to extend
     data_list_1, error_type = check_type(text[4], text, b)
     #print(data_list_1)
+    #print(error_type)
     if error_type == 1:
         data_list_2 = get_dates(text[6],text) #doc and fiel date
     if error_type == 2:
         data_list_2 = get_dates(text[4],text) #doc and fiel date
     data_list_3 = [CONAME, CROSS_REF, TICKER, EXCHANGE] = compfuncs.get_nte(text)
-    data_list_4 = [INCORP, CUSIP, COMMNO, IRS, P_SIC, IND_CLASS, FYE, AUDITOR] = compfuncs.get_iconumbers(text)
+    data_list_4 = [INCORP, CUSIP, COMMNO, IRS, P_SIC, FYE, AUDITOR] = compfuncs.get_iconumbers(text)
     data_list_1.extend(data_list_2)
     data_list_1.extend(data_list_3)
     data_list_1.extend(data_list_4)
@@ -183,7 +189,6 @@ def col_data_new(text,b,c):
     #c is doc info
     d = list(c) # creates copy to extend
     d.extend(compfuncs.get_new_all(text))
-    #print(d)
     return d
 
 
@@ -193,17 +198,15 @@ def main(path):
     # Pass text to different parsing functions to collect data
     path = os.path.abspath(path)
     print(path)
-    names = [['File_Path', 'File_Name', 'Doc_num', 'Doc_count', 'start_line', 'D_base']]
-    names_old = [['filing_type', 'filing_date', 'document_date', 'CONAME', 'CUSIP','Ticker', 'IRS_ID',
-               'SIC_P','SIC_A', 'FYE', 'exchange', 'AUDITOR','STOCK-AGENT','COUNSEL']]
-    data_list = ["","","","","","","","","","","","","",""]
-    ttlf = [['FILING-DATE:', 'DOCUMENT-DATE:', 'Document-Date', 'TICKER-SYMBOL:', 'EXCHANGE:',
-             "INCORPORATION:", "COMPANY-NUMBER:","CUSIP NUMBER:","COMMISSION FILE NO.:","IRS-ID:",
-             "SIC: SIC-CODES:","SIC: PRIMARY SIC:", "PRIMARY SIC:","INDUSTRY-CLASS:", ]]
 
     names_old = [['filing_type', 'filing_type_a', 'filing_date', 'document_date',
                'CONAME','CROSS_REF','ticker','exchange', 'CUSIP', 'IRS_ID',
                'SIC_P', 'FYE', 'AUDITOR']]
+    names_wf = [['path', 'doc_type', 'doc_number', 'line_number', 'filing_type', 'filing_type_a', 'filing_date', 'document_date',
+               'CONAME','CROSS_REF','ticker','exchange', 'INCORP', 'CUSIP', 'IRS_ID', 'COMM_NUM',
+               'SIC_P', 'FYE', 'AUDITOR']]
+
+    compfuncs.write_file(directory, names_wf , 'w')
     doct_found = 0
     req_paths, req_paths_doc = folder_loop(path) #creates lists of paths
     #print(req_paths_doc)
@@ -213,7 +216,6 @@ def main(path):
         #fhand = open(os.path.abspath(directory + "\\" + filename))
         #fhand = open(os.path.abspath(directory + "\\" + filename), encoding="utf8")
         fhand = open(filename, encoding="utf8")
-        #fhand = open(filename)
         [start, end] = [0, 0]
         text = []
         doc_count = 0
@@ -244,8 +246,8 @@ def main(path):
                     text = []
                     doc_type_known = False
                     doc_count += 1
-                    doc_info[2] = doc_count
-                    doc_info[3] = line_count
+                    doc_info[2] = str(doc_count)
+                    doc_info[3] = str(line_count)
 
 
             #if all(f in line for f in start_docu) and len(set(line.split()) - set(start_docu)) in [1,2] \
@@ -257,15 +259,13 @@ def main(path):
                 #doc_info[2] = doc_count
                 #doc_info[3] = line_count
 
-
             if doc_type == "SEC_OLD" and "TABLE OF CONTENTS" in line:
-                None
-                #if start == 1:
-                    #text.append(line.strip().replace('\xa0', ' '))
-                    #doc_info[1] = doc_type
-                    #doc_data.append(col_data(text, filename, doc_info))
-                #[start, end] = [0, 1]
-                #doc_type_known = False
+                if start == 1:
+                    text.append(line.strip().replace('\xa0', ' '))
+                    doc_info[1] = doc_type
+                    doc_data.append(col_data(text, filename, doc_info))
+                [start, end] = [0, 1]
+                doc_type_known = False
             if doc_type == "SEC_NEW" and "* * * * * * * * * * CONTENTS * * * * * * * * * *" in line:
                 if start == 1:
                     text.append(line.strip().replace('\xa0', ' '))
@@ -277,8 +277,9 @@ def main(path):
             if start == 1 and end == 0:
                 text.append(line.strip().replace('\xa0',' '))
             line_count += 1
-        for i in doc_data:
-            print(i)
+        compfuncs.write_file(directory, doc_data, 'a')
+        #for i in doc_data:
+            #print(i)
     return doc_data
 print(path)
 main(path)
